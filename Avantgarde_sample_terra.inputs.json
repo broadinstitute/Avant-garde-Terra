@@ -1,11 +1,11 @@
 {
-	"Avantgarde.ConvertCSVToZippedParquet.inputcsv": "gs://fc-a14038a2-2759-4e65-8bef-3c405bb0e683/AvantGardeDIA_Export.csv",
-	"Avantgarde.ConvertCSVToZippedParquet.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.0",
-	"Avantgarde.ConvertCSVToZippedParquet.mem_size": "4G",
-	"Avantgarde.ConvertCSVToZippedParquet.disk_size": 50,
-	"Avantgarde.ConvertCSVToZippedParquet.chunk_size": 4000,
-	"Avantgarde.ConvertCSVToZippedParquet.num_vm": 6,
-	"Avantgarde.ZippedParquetToCSV.disk_size": 50,
-	"Avantgarde.ZippedParquetToCSV.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.0",
-	"Avantgarde.ZippedParquetToCSV.mem_size": "4G"
+	"Avantgarde.convert_csv_to_zipped_parquet.inputcsv": "gs://fc-a14038a2-2759-4e65-8bef-3c405bb0e683/AvantGardeDIA_Export.csv",
+	"Avantgarde.convert_csv_to_zipped_parquet.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.0",
+	"Avantgarde.convert_csv_to_zipped_parquet.mem_size": "4G",
+	"Avantgarde.convert_csv_to_zipped_parquet.disk_size": 50,
+	"Avantgarde.convert_csv_to_zipped_parquet.chunk_size": 4000,
+	"Avantgarde.convert_csv_to_zipped_parquet.num_vm": 6,
+	"Avantgarde.zipped_parquet_to_csv.disk_size": 50,
+	"Avantgarde.zipped_parquet_to_csv.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.0",
+	"Avantgarde.zipped_parquet_to_csv.mem_size": "4G"
 }
