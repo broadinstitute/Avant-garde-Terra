@@ -7,5 +7,8 @@
 	"Avantgarde.convert_csv_to_zipped_parquet.num_vm": 6,
 	"Avantgarde.zipped_parquet_to_csv.disk_size": 50,
 	"Avantgarde.zipped_parquet_to_csv.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.0",
-	"Avantgarde.zipped_parquet_to_csv.mem_size": "4G"
+	"Avantgarde.zipped_parquet_to_csv.mem_size": "4G",
+	"Avantgarde.final_r_reports.disk_size": 50,
+	"Avantgarde.final_r_reports.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.0",
+	"Avantgarde.final_r_reports.mem_size": "4G"
 }
