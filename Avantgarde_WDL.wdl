@@ -4,7 +4,6 @@ workflow Avantgarde {
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
         call zipped_parquet_to_csv {input: zip_file = one_zip}
     }
-    scatter()
     call final_r_reports {input: csvs = flatten(zipped_parquet_to_csv.output_csvs)}
 }
 
@@ -109,6 +108,8 @@ task zipped_parquet_to_csv {
 
     parquet_to_csvs_from_one_partition(new_path, new_path, "csvs")
 
+    print(os.listdir("csvs"))
+
     #run R task
 
     CODE
@@ -126,10 +127,27 @@ task zipped_parquet_to_csv {
 }
 
 
-# for later with Avant-garde script:
-#    command {
-#    Rscript /path/ --options
-#    }
+task Run_R_Task {
+    File file_list
+    File params_file
+
+    String docker_image_name
+    String mem_size
+    Int disk_size
+
+    command<<<
+    python3 <<CODE
+    run_r_script_for_all_analytes(id_analyte_path=input_path,
+                                      csv_ds_root_path=self.csv_ds_root_path,
+                                      params_file_path=params_file_path,
+                                      output_dir=self.output_dir)
+
+    df = pd.read_csv(input_path)
+    df.to_csv(self.output().path, index=False)
+    CODE
+    >>>
+
+}
 
 task final_r_reports {
 
@@ -163,24 +181,3 @@ task final_r_reports {
     }
 }
 
-task Run_R_Task {
-    File file_list
-    File params_file
-
-    String docker_image_name
-    String mem_size
-    Int disk_size
-
-    command<<<
-    python3 <<CODE
-    run_r_script_for_all_analytes(id_analyte_path=input_path,
-                                      csv_ds_root_path=self.csv_ds_root_path,
-                                      params_file_path=params_file_path,
-                                      output_dir=self.output_dir)
-
-    df = pd.read_csv(input_path)
-    df.to_csv(self.output().path, index=False)
-    CODE
-    >>>
-
-}
