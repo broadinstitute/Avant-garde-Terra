@@ -3,9 +3,9 @@ workflow Avantgarde {
     call convert_csv_to_zipped_parquet
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
         call zipped_parquet_to_csv {input: zip_file = one_zip}
-        #call avant-garde
     }
-    call final_r_reports {input: csvs = zipped_parquet_to_csv.output_csvs}
+    scatter()
+    call final_r_reports {input: csvs = flatten(zipped_parquet_to_csv.output_csvs)}
 }
 
 task convert_csv_to_zipped_parquet {
@@ -125,38 +125,29 @@ task zipped_parquet_to_csv {
     }
 }
 
+
+# for later with Avant-garde script:
+#    command {
+#    Rscript /path/ --options
+#    }
+
 task final_r_reports {
 
-    Array[Array[File]] csvs
+    Array[File] csvs
 
     String docker_image_name
     String mem_size
     Int disk_size
 
-#    command {
-#    Rscript /path/ --options
-#    }
-
     command<<<
     python3 <<CODE
     import os
     import pandas as pd
-    import itertools
 
     os.mkdir("final_result")
 
-    #csv_list = list(${sep=',' csvs}.str.split(","))
-
-    #print(csv_list[:10])
-
-    csv_list = list(itertools.chain(*${csvs}))
-
-    print(csv_list)
-
-    all_csv = pd.concat([pd.read_csv(f) for f in csv_list])
+    all_csv = pd.concat([pd.read_csv(f) for f in "${sep=' ' csvs}".split()])
     all_csv.to_csv("final_result/all_csv.csv", index=False)
-
-    print(os.listdir("final_result"))
 
     CODE
     >>>
