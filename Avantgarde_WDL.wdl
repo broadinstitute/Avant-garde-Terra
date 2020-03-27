@@ -2,9 +2,9 @@ workflow Avantgarde {
 
     call convert_csv_to_zipped_parquet
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
-        call zipped_parquet_to_csv {input: zip_file = one_zip}
+        call unzip_csv_avg {input: zip_file = one_zip}
     }
-    call final_r_reports {input: csvs = flatten(zipped_parquet_to_csv.output_csvs)}
+    call final_r_reports {input: csvs = flatten(unzip_csv_avg.output_csvs)}
 }
 
 task convert_csv_to_zipped_parquet {
@@ -62,7 +62,7 @@ task convert_csv_to_zipped_parquet {
     }
 }
 
-task zipped_parquet_to_csv {
+task unzip_csv_avg {
 
     File zip_file
 
@@ -91,20 +91,7 @@ task zipped_parquet_to_csv {
             zip_filepath="${zip_file}", 
             zip_output_path="zip_output")
 
-    def create_path_of_PQpartition(path):
-        a = os.listdir(path)[0]
-        b = os.path.join(path, a)
-        return b
-
     new_path = create_path_of_PQpartition("zip_output")
-
-    def parquet_to_csvs_from_one_partition(path_PQ_partition_byGroup, parquet_dataset_dirpath,output_dirpath):
-        dd = [w.replace('ID_Analyte=', '') for w in os.listdir(path_PQ_partition_byGroup)]
-        dd = pd.DataFrame(dd, columns=['ID_Analyte'])
-        dd['ID_Analyte'].map(lambda x: read_only_one_partition_and_write_csv(
-            parquet_dataset_dirpath=parquet_dataset_dirpath,
-            output_dirpath=output_dirpath,
-            ID_analyte=x))
 
     parquet_to_csvs_from_one_partition(new_path, new_path, "csvs")
 
