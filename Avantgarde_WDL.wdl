@@ -84,6 +84,12 @@ task unzip_csv_avg {
     import numpy as np
     from avg_utils.parquet_file_formatting import unzip_ParquetPartition_keepingDatasetstructure
     from avg_utils.parquet_file_formatting import read_only_one_partition_and_write_csv
+    from avg_utils.parquet_file_formatting import create_path_of_PQpartition
+    from avg_utils.parquet_file_formatting import parquet_to_csvs_from_one_partition
+    #from .luigi_avg_rtask_utils import generate_subprocess_call_for_a_analyte, run_r_script_for_an_analyte, run_r_script_for_all_analytes
+
+    #print working directory
+    print(os.getcwd())
 
     os.mkdir("zip_output")
     os.mkdir("csvs")
@@ -97,13 +103,12 @@ task unzip_csv_avg {
 
     print(os.listdir("csvs"))
 
-    #run R task
-
     CODE
     >>>
 
     output {
-        Array[File] output_csvs = glob('csvs/*.csv')
+        #Array[File] output_csvs = glob('csvs/*.csv')
+        File output_csv = "test/test_double_commands.csv"
     }
 
     runtime {
@@ -144,18 +149,9 @@ task final_r_reports {
     String mem_size
     Int disk_size
 
-    command<<<
-    python3 <<CODE
-    import os
-    import pandas as pd
-
-    os.mkdir("final_result")
-
-    all_csv = pd.concat([pd.read_csv(f) for f in "${sep=' ' csvs}".split()])
-    all_csv.to_csv("final_result/all_csv.csv", index=False)
-
-    CODE
-    >>>
+    command {
+        Rscript /usr/local/src/dummy_gather.R "${sep=' ' csvs}"
+    }
 
     output {
         File final_output = 'final_result/all_csv.csv'
@@ -167,4 +163,3 @@ task final_r_reports {
         disks: "local-disk " + disk_size + " SSD"
     }
 }
-
