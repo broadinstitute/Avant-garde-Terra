@@ -2,7 +2,7 @@ workflow Avantgarde {
 
     call convert_csv_to_zipped_parquet
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
-        call unzip_csv_avg {input: zip_file = one_zip}
+        call unzip_csv_avg {input: zip_file = one_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary}
     }
     call final_r_reports {input: csvs = flatten(unzip_csv_avg.output_csvs)}
 }
@@ -53,6 +53,7 @@ task convert_csv_to_zipped_parquet {
 
     output {
         Array[File] output_zip = glob("zip_files/*.zip")
+        File output_glossary = "indices_glossary/ID_Analyte.csv"
     }
 
     runtime {
@@ -65,6 +66,8 @@ task convert_csv_to_zipped_parquet {
 task unzip_csv_avg {
 
     File zip_file
+    File params_file
+    File glossary_file
 
     String docker_image_name
     String mem_size
@@ -103,12 +106,46 @@ task unzip_csv_avg {
 
     print(os.listdir("csvs"))
 
+    print("**************************")
+
+    x = pd.read_csv("${glossary_file}")
+    print(x.head())
+
+    print("**************************")
+
+    os.mkdir("avg_results")
+
+    def generate_subprocess_call_for_a_analyte(hashed_id, csv_ds_root_path, params_file_path, output_dir):
+
+        R_SCRIPT_PATH = "Rscript"
+        local_path = "/usr/local/src/"
+
+        subprocess_call_for_r_script = str(
+            R_SCRIPT_PATH +
+            ' "' + os.path.join(local_path,"scatter_dummy_file_test.R") + '" ' +
+            ' "' + os.path.join(local_path, csv_ds_root_path, 'data_analyte_' + str(hashed_id) + '.csv') + '" ' +
+            ' "' + str(params_file_path) + '" ' +
+            ' "' + str(hashed_id) + '" ' +
+            ' "' + os.path.join(local_path, output_dir) + '" ')
+
+        return subprocess_call_for_r_script
+
+    def run_r_script_for_an_analyte(hashed_id, csv_ds_root_path, params_file_path, output_dir):
+
+        subprocess_call_for_r_script = generate_subprocess_call_for_a_analyte(
+            hashed_id, csv_ds_root_path, params_file_path, output_dir)
+
+        print('subcall:' + subprocess_call_for_r_script)
+
+        subprocess.call(subprocess_call_for_r_script, shell=True)  
+
+    run_r_script_for_an_analyte(hashed_id = "0fe30dcd", csv_ds_root_path = "csvs", params_file_path="${params_file}", output_dir="avg_results")    
+
     CODE
     >>>
 
     output {
-        #Array[File] output_csvs = glob('csvs/*.csv')
-        File output_csv = "test/test_double_commands.csv"
+        Array[File] output_csvs = glob('csvs/*.csv')
     }
 
     runtime {
@@ -116,29 +153,6 @@ task unzip_csv_avg {
         memory: mem_size
         disks: "local-disk " + disk_size + " SSD"
     }
-}
-
-
-task Run_R_Task {
-    File file_list
-    File params_file
-
-    String docker_image_name
-    String mem_size
-    Int disk_size
-
-    command<<<
-    python3 <<CODE
-    run_r_script_for_all_analytes(id_analyte_path=input_path,
-                                      csv_ds_root_path=self.csv_ds_root_path,
-                                      params_file_path=params_file_path,
-                                      output_dir=self.output_dir)
-
-    df = pd.read_csv(input_path)
-    df.to_csv(self.output().path, index=False)
-    CODE
-    >>>
-
 }
 
 task final_r_reports {
