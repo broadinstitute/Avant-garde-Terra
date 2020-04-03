@@ -91,8 +91,11 @@ task unzip_csv_avg {
     from avg_utils.parquet_file_formatting import parquet_to_csvs_from_one_partition
     #from .luigi_avg_rtask_utils import generate_subprocess_call_for_a_analyte, run_r_script_for_an_analyte, run_r_script_for_all_analytes
 
+    print("%%%%%%%%%%%%%%%%%%%%%%%%")
     #print working directory
     print(os.getcwd())
+
+    print("%%%%%%%%%%%%%%%%%%%%%%%%")
 
     os.mkdir("zip_output")
     os.mkdir("csvs")
@@ -118,15 +121,14 @@ task unzip_csv_avg {
     def generate_subprocess_call_for_a_analyte(hashed_id, csv_ds_root_path, params_file_path, output_dir):
 
         R_SCRIPT_PATH = "Rscript"
-        local_path = "/usr/local/src/"
 
         subprocess_call_for_r_script = str(
             R_SCRIPT_PATH +
-            ' "' + os.path.join(local_path,"scatter_dummy_file_test.R") + '" ' +
-            ' "' + os.path.join(local_path, csv_ds_root_path, 'data_analyte_' + str(hashed_id) + '.csv') + '" ' +
+            ' "/usr/local/src/scatter_dummy_file_test.R" ' +
+            ' "' + os.path.join(csv_ds_root_path, 'data_analyte_' + str(hashed_id) + '.csv') + '" ' +
             ' "' + str(params_file_path) + '" ' +
             ' "' + str(hashed_id) + '" ' +
-            ' "' + os.path.join(local_path, output_dir) + '" ')
+            ' "' + str(output_dir) + '" ')
 
         return subprocess_call_for_r_script
 
@@ -137,15 +139,29 @@ task unzip_csv_avg {
 
         print('subcall:' + subprocess_call_for_r_script)
 
-        subprocess.call(subprocess_call_for_r_script, shell=True)  
+        subprocess.call(subprocess_call_for_r_script, shell=True)
 
-    run_r_script_for_an_analyte(hashed_id = "0fe30dcd", csv_ds_root_path = "csvs", params_file_path="${params_file}", output_dir="avg_results")    
+    def run_r_script_for_all_analytes(id_analyte_path,csv_ds_root_path, params_file_path, output_dir):
+        dd = pd.read_csv(id_analyte_path)
+        dd['ID_Analyte'].map(lambda x: run_r_script_for_an_analyte(
+            hashed_id=x,
+            csv_ds_root_path=csv_ds_root_path,
+            params_file_path=params_file_path,
+            output_dir=output_dir))
+
+    run_r_script_for_all_analytes(id_analyte_path="${glossary_file}",
+                                      csv_ds_root_path="csvs",
+                                      params_file_path="${params_file}",
+                                      output_dir="avg_results") 
+
+    print("%%%%%%%%%%%%%%%%%%%%%%%%%")
+    print(os.listdir("avg_results"))   
 
     CODE
     >>>
 
     output {
-        Array[File] output_csvs = glob('csvs/*.csv')
+        Array[File] output_csvs = glob('avg_results/*.csv')
     }
 
     runtime {
