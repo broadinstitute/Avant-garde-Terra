@@ -75,7 +75,8 @@ RUN R -e "install.packages(c('doSNOW', 'snow', 'iterators', 'foreach', 'sqldf','
 #WORKDIR /usr/local/src
 COPY avg_utils-0.0.0.tar.gz \
       dummy_gather.R \
-      scatter_dummy_file_test.R \
+      AvG_for_Terra.R \
+      AvantGardeDIA.R \
 	/usr/local/src/
 
 ## Install AvG utils python module
