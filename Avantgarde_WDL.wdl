@@ -127,7 +127,10 @@ task unzip_csv_avg {
         subprocess.call(subprocess_call_for_r_script, shell=True)
 
     def run_r_script_for_all_analytes(id_analyte_path,csv_ds_root_path, params_file_path, output_dir):
-        dd = [w.replace('ID_Analyte=', '') for w in os.listdir("zip_output")]
+        dd = [w.replace('data_analyte_', '') for w in os.listdir("csvs")]
+        print(dd)
+        dd = [w.replace('.csv', '') for w in dd]
+        print(dd)
         dd = pd.DataFrame(dd, columns=['ID_Analyte'])
         print(dd)
         dd['ID_Analyte'].map(lambda x: run_r_script_for_an_analyte(
@@ -136,14 +139,11 @@ task unzip_csv_avg {
             params_file_path=params_file_path,
             output_dir=output_dir))
 
-    os.listdir("zip_output")
+    os.listdir("csvs")
     run_r_script_for_all_analytes(id_analyte_path="${glossary_file}",
                                       csv_ds_root_path="csvs",
                                       params_file_path="${params_file}",
-                                      output_dir="avg_results") 
-
-    print("%%%%%%%%%%%%%%%%%%%%%%%%%")
-    print(os.listdir("avg_results"))   
+                                      output_dir="avg_results")   
 
     CODE
     >>>
