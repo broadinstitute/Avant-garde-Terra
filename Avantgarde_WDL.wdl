@@ -91,14 +91,10 @@ task unzip_csv_avg {
     from avg_utils.parquet_file_formatting import parquet_to_csvs_from_one_partition
     #from .luigi_avg_rtask_utils import generate_subprocess_call_for_a_analyte, run_r_script_for_an_analyte, run_r_script_for_all_analytes
 
-    print("%%%%%%%%%%%%%%%%%%%%%%%%")
-    #print working directory
-    print(os.getcwd())
-
-    print("%%%%%%%%%%%%%%%%%%%%%%%%")
-
     os.mkdir("zip_output")
     os.mkdir("csvs")
+    os.mkdir("avg_results")
+    
     unzip_ParquetPartition_keepingDatasetstructure(
             zip_filepath="${zip_file}", 
             zip_output_path="zip_output")
@@ -106,17 +102,6 @@ task unzip_csv_avg {
     new_path = create_path_of_PQpartition("zip_output")
 
     parquet_to_csvs_from_one_partition(new_path, new_path, "csvs")
-
-    print(os.listdir("csvs"))
-
-    print("**************************")
-
-    x = pd.read_csv("${glossary_file}")
-    print(x.head())
-
-    print("**************************")
-
-    os.mkdir("avg_results")
 
     def generate_subprocess_call_for_a_analyte(hashed_id, csv_ds_root_path, params_file_path, output_dir):
 
@@ -142,13 +127,16 @@ task unzip_csv_avg {
         subprocess.call(subprocess_call_for_r_script, shell=True)
 
     def run_r_script_for_all_analytes(id_analyte_path,csv_ds_root_path, params_file_path, output_dir):
-        dd = pd.read_csv(id_analyte_path)
+        dd = [w.replace('ID_Analyte=', '') for w in os.listdir("zip_output")]
+        dd = pd.DataFrame(dd, columns=['ID_Analyte'])
+        print(dd)
         dd['ID_Analyte'].map(lambda x: run_r_script_for_an_analyte(
             hashed_id=x,
             csv_ds_root_path=csv_ds_root_path,
             params_file_path=params_file_path,
             output_dir=output_dir))
 
+    os.listdir("zip_output")
     run_r_script_for_all_analytes(id_analyte_path="${glossary_file}",
                                       csv_ds_root_path="csvs",
                                       params_file_path="${params_file}",
