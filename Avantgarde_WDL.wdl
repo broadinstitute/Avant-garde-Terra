@@ -109,7 +109,7 @@ task unzip_csv_avg {
 
         subprocess_call_for_r_script = str(
             R_SCRIPT_PATH +
-            ' "/usr/local/src/scatter_dummy_file_test.R" ' +
+            ' "/usr/local/src/AvG_for_Terra.R" ' +
             ' "' + os.path.join(csv_ds_root_path, 'data_analyte_' + str(hashed_id) + '.csv') + '" ' +
             ' "' + str(params_file_path) + '" ' +
             ' "' + str(hashed_id) + '" ' +
@@ -122,24 +122,20 @@ task unzip_csv_avg {
         subprocess_call_for_r_script = generate_subprocess_call_for_a_analyte(
             hashed_id, csv_ds_root_path, params_file_path, output_dir)
 
-        print('subcall:' + subprocess_call_for_r_script)
+        #print('subcall:' + subprocess_call_for_r_script)
 
         subprocess.call(subprocess_call_for_r_script, shell=True)
 
     def run_r_script_for_all_analytes(id_analyte_path,csv_ds_root_path, params_file_path, output_dir):
         dd = [w.replace('data_analyte_', '') for w in os.listdir("csvs")]
-        print(dd)
         dd = [w.replace('.csv', '') for w in dd]
-        print(dd)
         dd = pd.DataFrame(dd, columns=['ID_Analyte'])
-        print(dd)
         dd['ID_Analyte'].map(lambda x: run_r_script_for_an_analyte(
             hashed_id=x,
             csv_ds_root_path=csv_ds_root_path,
             params_file_path=params_file_path,
             output_dir=output_dir))
 
-    os.listdir("csvs")
     run_r_script_for_all_analytes(id_analyte_path="${glossary_file}",
                                       csv_ds_root_path="csvs",
                                       params_file_path="${params_file}",
