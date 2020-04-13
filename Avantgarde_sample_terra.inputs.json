@@ -7,9 +7,10 @@
 	"Avantgarde.convert_csv_to_zipped_parquet.num_vm": 6,
 	"Avantgarde.unzip_csv_avg.params_file": "gs://fc-a14038a2-2759-4e65-8bef-3c405bb0e683/AvG_Params.R",
 	"Avantgarde.unzip_csv_avg.disk_size": 50,
-	"Avantgarde.unzip_csv_avg.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.9",
+	"Avantgarde.unzip_csv_avg.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.12",
 	"Avantgarde.unzip_csv_avg.mem_size": "4G",
+	"Avantgarde.final_r_reports.params_file": "gs://fc-a14038a2-2759-4e65-8bef-3c405bb0e683/AvG_Params.R",
 	"Avantgarde.final_r_reports.disk_size": 50,
-	"Avantgarde.final_r_reports.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.9",
+	"Avantgarde.final_r_reports.docker_image_name": "gcr.io/lincs-phosphodia-2/avg-docker:version1.12",
 	"Avantgarde.final_r_reports.mem_size": "4G"
 }

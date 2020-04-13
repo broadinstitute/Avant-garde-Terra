@@ -4,7 +4,7 @@ workflow Avantgarde {
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
         call unzip_csv_avg {input: zip_file = one_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary}
     }
-    call final_r_reports {input: csvs = flatten(unzip_csv_avg.output_csvs)}
+    call final_r_reports {input: csvs = flatten(unzip_csv_avg.output_csvs), glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep}
 }
 
 task convert_csv_to_zipped_parquet {
@@ -54,6 +54,8 @@ task convert_csv_to_zipped_parquet {
     output {
         Array[File] output_zip = glob("zip_files/*.zip")
         File output_glossary = "indices_glossary/ID_Analyte.csv"
+        File output_transition_loc = "indices_glossary/ID_transition_locator.csv"
+        File output_rep = "indices_glossary/ID_Rep.csv"
     }
 
     runtime {
@@ -158,18 +160,22 @@ task unzip_csv_avg {
 task final_r_reports {
 
     Array[File] csvs
+    File params_file
+    File glossary_file
+    File transition_loc
+    File id_rep
 
     String docker_image_name
     String mem_size
     Int disk_size
 
     command {
-        Rscript /usr/local/src/dummy_gather.R "${sep=' ' csvs}"
+        Rscript /usr/local/src/dummy_gather.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "final_result"
     }
 
-    output {
-        File final_output = 'final_result/all_csv.csv'
-    }
+    #output {
+    #    File final_output = 'final_result/all_csv.csv'
+    #}
 
     runtime {
         docker: docker_image_name
