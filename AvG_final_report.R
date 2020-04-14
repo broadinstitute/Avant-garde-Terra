@@ -17,7 +17,7 @@ args <- commandArgs(TRUE)
 #print(args)
 
 params_file <- as.character(args[1])
-avg_results_path <- as.character(args[2])
+avg_results_path_original <- as.character(args[2])
 MetaData_Analytes_path <- as.character(args[3])
 Transition_Locator <- as.character(args[4])
 MetaData_Replicate <- as.character(args[5])
@@ -39,12 +39,15 @@ MetaData_Analytes<- fread(MetaData_Analytes_path, stringsAsFactors = F) %>% chan
 Transition_Locator<- fread(Transition_Locator, stringsAsFactors = F) %>% change_names()
 MetaData_Replicate<- fread(MetaData_Replicate, stringsAsFactors = F) %>% change_names()
 
+avg_results_path = unlist(strsplit(avg_results_path_original, " "))
+print(avg_results_path)
+
 source(params_file)
 ## Peak_BOundaries
-PBlist<-list.files(avg_results_path, pattern = paste0("Report_GR_PeakBoundaries_"))
-ListFiles_PeakBoundaries<-paste0(avg_results_path,"/",PBlist)
+ListFiles_PeakBoundaries<-grep(pattern = "Report_GR_PeakBoundaries_", x = avg_results_path, value = TRUE)
+print(ListFiles_PeakBoundaries)
 
-if(length(PBlist)>=1){
+if(length(ListFiles_PeakBoundaries)>=1){
   l <- lapply(ListFiles_PeakBoundaries, fread, header = F,sep=';', stringsAsFactors = FALSE)
   NewPeakBoundaries_All_Results <- rbindlist( l )
   
@@ -64,13 +67,14 @@ if(length(PBlist)>=1){
     rename(PrecursorIsDecoy=IsDecoy) %>%
     distinct()
   
-  write.csv(Formatted,file=paste0(output_path,"Peak_Boundaries_results.csv"),quote=F,row.names=F)
+  write.csv(Formatted,file=file.path(output_path,"Peak_Boundaries_results.csv"),quote=F,row.names=F)
 }
 
 ## Report Transitions
-Translist<-list.files(avg_results_path,pattern = paste0("Report_GR_Transitions_"))
-ListFiles_Transitions<-paste0(avg_results_path,"/",Translist)
-if(length(Translist)>=1){
+ListFiles_Transitions<-grep(pattern = "Report_GR_Transitions_", x = avg_results_path, value = TRUE)
+print(ListFiles_Transitions)
+
+if(length(ListFiles_Transitions)>=1){
   l_trans <- lapply(ListFiles_Transitions, fread, header = F,sep=';', stringsAsFactors = FALSE)
   NewTransitions_All_Results <- rbindlist( l_trans )
   colnames(NewTransitions_All_Results)<-c("ID_FragmentIon_charge","ID_Analyte")
@@ -83,7 +87,7 @@ if(length(Translist)>=1){
     rename(ElementLocator = TransitionLocator) %>%
     select(ElementLocator, Quantitative)
   
-  write.table(Trans_results,file=paste0(output_path,"Transition_results.csv"),quote=F,row.names=F,col.names=T,sep=",")
+  write.table(Trans_results,file=file.path(output_path,"Transition_results.csv"),quote=F,row.names=F,col.names=T,sep=",")
 }  
 
 print(output_path)
