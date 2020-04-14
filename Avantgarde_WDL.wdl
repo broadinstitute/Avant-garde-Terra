@@ -170,12 +170,13 @@ task final_r_reports {
     Int disk_size
 
     command {
-        Rscript /usr/local/src/dummy_gather.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "final_result"
+        Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "final_result"
     }
 
-    #output {
-    #    File final_output = 'final_result/all_csv.csv'
-    #}
+    output {
+        File transitions_results = 'final_result/Transition_results.csv'
+        File peak_boundaries = 'final_result/Peak_Boundaries_results.csv'
+    }
 
     runtime {
         docker: docker_image_name

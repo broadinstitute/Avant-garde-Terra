@@ -74,7 +74,7 @@ RUN R -e "install.packages(c('doSNOW', 'snow', 'iterators', 'foreach', 'sqldf','
 
 #WORKDIR /usr/local/src
 COPY avg_utils-0.0.0.tar.gz \
-      dummy_gather.R \
+      AvG_final_report.R \
       AvG_for_Terra.R \
       AvantGardeDIA.R \
 	/usr/local/src/
