@@ -2,7 +2,7 @@ workflow Avantgarde {
 
     call convert_csv_to_zipped_parquet
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
-        call unzip_csv_avg {input: zip_file = one_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary}
+        call unzip_csv_avg {input: zip_file = one_zip}
     }
     call final_r_reports {input: csvs = flatten(unzip_csv_avg.output_csvs), glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep}
 }
@@ -69,7 +69,6 @@ task unzip_csv_avg {
 
     File zip_file
     File params_file
-    File glossary_file
 
     String docker_image_name
     String mem_size
@@ -91,7 +90,7 @@ task unzip_csv_avg {
     from avg_utils.parquet_file_formatting import read_only_one_partition_and_write_csv
     from avg_utils.parquet_file_formatting import create_path_of_PQpartition
     from avg_utils.parquet_file_formatting import parquet_to_csvs_from_one_partition
-    #from .luigi_avg_rtask_utils import generate_subprocess_call_for_a_analyte, run_r_script_for_an_analyte, run_r_script_for_all_analytes
+    from .luigi_avg_rtask_utils import generate_subprocess_call_for_a_analyte, run_r_script_for_an_analyte, run_r_script_for_all_analytes
 
     os.mkdir("zip_output")
     os.mkdir("csvs")
@@ -105,41 +104,7 @@ task unzip_csv_avg {
 
     parquet_to_csvs_from_one_partition(new_path, new_path, "csvs")
 
-    def generate_subprocess_call_for_a_analyte(hashed_id, csv_ds_root_path, params_file_path, output_dir):
-
-        R_SCRIPT_PATH = "Rscript"
-
-        subprocess_call_for_r_script = str(
-            R_SCRIPT_PATH +
-            ' "/usr/local/src/AvG_for_Terra.R" ' +
-            ' "' + os.path.join(csv_ds_root_path, 'data_analyte_' + str(hashed_id) + '.csv') + '" ' +
-            ' "' + str(params_file_path) + '" ' +
-            ' "' + str(hashed_id) + '" ' +
-            ' "' + str(output_dir) + '" ')
-
-        return subprocess_call_for_r_script
-
-    def run_r_script_for_an_analyte(hashed_id, csv_ds_root_path, params_file_path, output_dir):
-
-        subprocess_call_for_r_script = generate_subprocess_call_for_a_analyte(
-            hashed_id, csv_ds_root_path, params_file_path, output_dir)
-
-        #print('subcall:' + subprocess_call_for_r_script)
-
-        subprocess.call(subprocess_call_for_r_script, shell=True)
-
-    def run_r_script_for_all_analytes(id_analyte_path,csv_ds_root_path, params_file_path, output_dir):
-        dd = [w.replace('data_analyte_', '') for w in os.listdir("csvs")]
-        dd = [w.replace('.csv', '') for w in dd]
-        dd = pd.DataFrame(dd, columns=['ID_Analyte'])
-        dd['ID_Analyte'].map(lambda x: run_r_script_for_an_analyte(
-            hashed_id=x,
-            csv_ds_root_path=csv_ds_root_path,
-            params_file_path=params_file_path,
-            output_dir=output_dir))
-
-    run_r_script_for_all_analytes(id_analyte_path="${glossary_file}",
-                                      csv_ds_root_path="csvs",
+    run_r_script_for_all_analytes(csv_ds_root_path="csvs",
                                       params_file_path="${params_file}",
                                       output_dir="avg_results")   
 
