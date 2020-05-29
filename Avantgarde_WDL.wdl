@@ -14,8 +14,8 @@ task convert_csv_to_zipped_parquet {
     Int num_vm
 
     String docker_image_name
-    String mem_size
-    Int disk_size
+    Int? mem_size
+    Int? disk_size
 
     command<<<
     python3 <<CODE
@@ -60,8 +60,8 @@ task convert_csv_to_zipped_parquet {
 
     runtime {
         docker: docker_image_name
-        memory: mem_size
-        disks: "local-disk " + disk_size + " SSD"
+        memory: select_first([mem_size, 4]) + "G"
+        disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
     }
 }
 
@@ -71,8 +71,8 @@ task unzip_csv_avg {
     File params_file
 
     String docker_image_name
-    String mem_size
-    Int disk_size
+    Int? mem_size
+    Int? disk_size
 
     command<<<
     python3 <<CODE
@@ -121,8 +121,8 @@ task unzip_csv_avg {
 
     runtime {
         docker: docker_image_name
-        memory: mem_size
-        disks: "local-disk " + disk_size + " SSD"
+        memory: select_first([mem_size, 4]) + "G"
+        disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
     }
 }
 
@@ -135,8 +135,8 @@ task final_r_reports {
     File id_rep
 
     String docker_image_name
-    String mem_size
-    Int disk_size
+    Int? mem_size
+    Int? disk_size
 
     command {
         Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "final_result"
@@ -149,7 +149,7 @@ task final_r_reports {
 
     runtime {
         docker: docker_image_name
-        memory: mem_size
-        disks: "local-disk " + disk_size + " SSD"
+        memory: select_first([mem_size, 4]) + "G"
+        disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
     }
 }
