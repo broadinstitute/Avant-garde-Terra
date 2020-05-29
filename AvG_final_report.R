@@ -17,7 +17,7 @@ args <- commandArgs(TRUE)
 #print(args)
 
 params_file <- as.character(args[1])
-avg_results_path_original <- as.character(args[2])
+avg_results_path_zip <- as.character(args[2])
 MetaData_Analytes_path <- as.character(args[3])
 Transition_Locator <- as.character(args[4])
 MetaData_Replicate <- as.character(args[5])
@@ -39,12 +39,19 @@ MetaData_Analytes<- fread(MetaData_Analytes_path, stringsAsFactors = F) %>% chan
 Transition_Locator<- fread(Transition_Locator, stringsAsFactors = F) %>% change_names()
 MetaData_Replicate<- fread(MetaData_Replicate, stringsAsFactors = F) %>% change_names()
 
-avg_results_path = unlist(strsplit(avg_results_path_original, " "))
-print(avg_results_path)
+avg_results_path_zip_list = unlist(strsplit(avg_results_path_zip, " "))
+#print(avg_results_path_zip_list)
+
+for (file in avg_results_path_zip_list){
+	unzip(zipfile = file)
+}
+avg_results_path = "avg_results"
+#list.files(avg_results_path)
 
 source(params_file)
 ## Peak_BOundaries
-ListFiles_PeakBoundaries<-grep(pattern = "Report_GR_PeakBoundaries_", x = avg_results_path, value = TRUE)
+PBlist<-list.files(avg_results_path, pattern = paste0("Report_GR_PeakBoundaries_"))
+ListFiles_PeakBoundaries<-paste0(avg_results_path,"/",PBlist)
 print(ListFiles_PeakBoundaries)
 
 if(length(ListFiles_PeakBoundaries)>=1){
@@ -71,7 +78,8 @@ if(length(ListFiles_PeakBoundaries)>=1){
 }
 
 ## Report Transitions
-ListFiles_Transitions<-grep(pattern = "Report_GR_Transitions_", x = avg_results_path, value = TRUE)
+Translist<-list.files(avg_results_path,pattern = paste0("Report_GR_Transitions_"))
+ListFiles_Transitions<-paste0(avg_results_path,"/",Translist)
 print(ListFiles_Transitions)
 
 if(length(ListFiles_Transitions)>=1){

@@ -4,7 +4,7 @@ workflow Avantgarde {
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
         call unzip_csv_avg {input: zip_file = one_zip}
     }
-    call final_r_reports {input: csvs = flatten(unzip_csv_avg.output_csvs), glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep}
+    call final_r_reports {input: csvs = unzip_csv_avg.output_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep}
 }
 
 task convert_csv_to_zipped_parquet {
@@ -90,11 +90,13 @@ task unzip_csv_avg {
     from avg_utils.parquet_file_formatting import read_only_one_partition_and_write_csv
     from avg_utils.parquet_file_formatting import create_path_of_PQpartition
     from avg_utils.parquet_file_formatting import parquet_to_csvs_from_one_partition
-    from .luigi_avg_rtask_utils import generate_subprocess_call_for_a_analyte, run_r_script_for_an_analyte, run_r_script_for_all_analytes
+    from avg_utils.parquet_file_formatting import zip_dir_keeping_folder_structure
+    from avg_utils.luigi_avg_rtask_utils import generate_subprocess_call_for_a_analyte, run_r_script_for_an_analyte, run_r_script_for_all_analytes
 
     os.mkdir("zip_output")
     os.mkdir("csvs")
     os.mkdir("avg_results")
+    os.mkdir("new_zip_output")
     
     unzip_ParquetPartition_keepingDatasetstructure(
             zip_filepath="${zip_file}", 
@@ -106,13 +108,15 @@ task unzip_csv_avg {
 
     run_r_script_for_all_analytes(csv_ds_root_path="csvs",
                                       params_file_path="${params_file}",
-                                      output_dir="avg_results")   
+                                      output_dir="avg_results") 
+
+    zip_dir_keeping_folder_structure(directory = "avg_results", zipname = "zipped_csvs.zip")
 
     CODE
     >>>
 
     output {
-        Array[File] output_csvs = glob('avg_results/*.csv')
+        File output_zip = "zipped_csvs.zip"
     }
 
     runtime {
