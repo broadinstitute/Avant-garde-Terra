@@ -43,6 +43,7 @@ ENV ARROW_HOME=/opt/arrow
 WORKDIR /usr/local/src
 RUN git clone https://github.com/apache/arrow.git
 WORKDIR $ARROW_SOURCE_PATH/cpp
+RUN pip3 install --upgrade pip
 RUN cmake                                \
       -DCMAKE_INSTALL_PREFIX=$ARROW_HOME \
       -DCMAKE_BUILD_TYPE=Release         \
