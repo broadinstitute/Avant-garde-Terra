@@ -15,7 +15,7 @@ args <- commandArgs(TRUE)
 
 # load arguments
 params_file <- as.character(args[1])
-avg_results_path <- as.character(args[2])
+avg_results_path_zip <- as.character(args[2])
 MetaData_Analytes_path <- as.character(args[3])
 Transition_Locator <- as.character(args[4])
 MetaData_Replicate <- as.character(args[5])
