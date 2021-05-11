@@ -578,13 +578,20 @@ data= fread(file=analyte_data,
 names(data)<-gsub(names(data),pattern = "\\.",replacement = "")
 names(data)<-gsub(names(data),pattern = " ",replacement = "")
 
-data <- data %>% filter(!is.na(LibraryIntensity))
-data <- Filter_Na_Shared_Or_LowMassTransitions(data)
+# data <- data %>% filter(!is.na(LibraryIntensity))
+data <- data %>%
+        data.frame()%>%
+        arrange(ID_FragmentIon_charge, ID_Rep , ID_Analyte)
+# data <- Filter_Na_Shared_Or_LowMassTransitions(data)
 
 i = analyte_hash_id
 A<-AvantGardeDIA_GlobalRefinement_modif(data)
 
 transition_results <- A$Results_TransitionRefinementTool$Report.Transition.Values %>% select(ID_FragmentIon_charge,ID_Analyte) %>% distinct()
 peak_Boundaries_results <- A$Results_PeakBoundaries_tool$New_PeakBoundaries %>% select(MinStartTime=left,MaxEndTime=right, ID_Rep, ID_Analyte) %>% distinct()
+rep_values_results <- A$Results_TransitionRefinementTool$Report.Replicate.Values
+rescore_results <- A$Results_ReScore
 write.table(transition_results, file=paste0(output_dir,"/Report_GR_Transitions_",Name_Tag,"_",i,".csv"),quote=F,row.names=F,col.names=F,sep=";")
 write.table(peak_Boundaries_results,file=paste0(output_dir,"/Report_GR_PeakBoundaries_",Name_Tag,"_",i,".csv"),quote=F,row.names=F,col.names=F,sep=";")
+write.table(rep_values_results,file=paste0(output_dir,"/Report_GR_Replicate_",Name_Tag,"_",i,".csv"),quote=F,row.names=F,col.names=F,sep=";")
+write.table(rescore_results,file=paste0(output_dir,"/Report_GR_ReScore_",Name_Tag,"_",i,".csv"),quote=F,row.names=F,col.names=F,sep=";")

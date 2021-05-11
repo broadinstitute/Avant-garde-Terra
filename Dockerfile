@@ -27,6 +27,7 @@ RUN apt-get update                                          \
       pkg-config                                            \
       python3                                               \
       python3-pip                                           \
+      wget                                                  \
     && rm -rf /var/lib/apt/lists/*
 RUN pip3 install \
       cython    \
@@ -70,16 +71,17 @@ RUN R -e "install.packages(c('doSNOW', 'snow', 'iterators', 'foreach', 'sqldf','
             repos='http://cran.rstudio.com/')"
 
 ##
-## Copy over AvG utils python module
+## Copy over src scripts and python package
 ##
 
 #WORKDIR /usr/local/src
-#COPY avg_utils-0.0.0.tar.gz \
-#      AvG_final_report.R \
-#      AvG_for_Terra.R \
-#      AvantGardeDIA.R \
-#	/usr/local/src/
 COPY src /usr/local/src/
+
+##
+## Pull Avant-garde script from original repo
+##
+
+RUN wget https://raw.githubusercontent.com/SebVaca/Avant_garde/master/r_package/AvantGardeDIA/R/AvantGardeDIA.R
 
 ## Install AvG utils python module
 RUN pip3 install avg_utils-0.0.0.tar.gz

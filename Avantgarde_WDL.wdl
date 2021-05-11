@@ -2,9 +2,9 @@ workflow Avantgarde {
 
     call convert_csv_to_zipped_parquet
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
-        call unzip_csv_avg {input: zip_file = one_zip}
+        call run_avg {input: zip_file = one_zip}
     }
-    call final_r_reports {input: csvs = unzip_csv_avg.output_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep}
+    call final_r_reports {input: csvs = run_avg.output_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep, MetaData_PrecursorResults = convert_csv_to_zipped_parquet.output_metadata}
 }
 
 task convert_csv_to_zipped_parquet {
@@ -13,9 +13,9 @@ task convert_csv_to_zipped_parquet {
     Int chunk_size
     Int num_vm
 
-    String docker_image_name
     Int? mem_size
     Int? disk_size
+    Int? num_preemptions
 
     command<<<
     python3 <<CODE
@@ -56,23 +56,26 @@ task convert_csv_to_zipped_parquet {
         File output_glossary = "indices_glossary/ID_Analyte.csv"
         File output_transition_loc = "indices_glossary/ID_transition_locator.csv"
         File output_rep = "indices_glossary/ID_Rep.csv"
+        File output_metadata = "indices_glossary/MetaData_PrecursorResults.csv"
     }
 
     runtime {
-        docker: docker_image_name
+        docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
         memory: select_first([mem_size, 4]) + "G"
         disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
+        preemptible : select_first ([num_preemptions, 0])
     }
 }
 
-task unzip_csv_avg {
+task run_avg {
 
     File zip_file
     File params_file
 
-    String docker_image_name
     Int? mem_size
     Int? disk_size
+    Int? num_threads
+    Int? num_preemptions
 
     command<<<
     python3 <<CODE
@@ -120,9 +123,11 @@ task unzip_csv_avg {
     }
 
     runtime {
-        docker: docker_image_name
+        docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
         memory: select_first([mem_size, 4]) + "G"
         disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
+        cpu: select_first ([num_threads, 4]) + ""
+        preemptible : select_first ([num_preemptions, 0])
     }
 }
 
@@ -133,23 +138,27 @@ task final_r_reports {
     File glossary_file
     File transition_loc
     File id_rep
+    File MetaData_PrecursorResults
+    String output_prefix
 
-    String docker_image_name
     Int? mem_size
     Int? disk_size
+    Int? num_preemptions
 
     command {
-        Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "final_result"
+        Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "${MetaData_PrecursorResults}" "final_result"
+
+        zip -r "${output_prefix}_avg_results.zip" final_result
     }
 
     output {
-        File transitions_results = 'final_result/Transition_results.csv'
-        File peak_boundaries = 'final_result/Peak_Boundaries_results.csv'
+        File avg_results = "${output_prefix}_avg_results.zip"
     }
 
     runtime {
-        docker: docker_image_name
+        docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
         memory: select_first([mem_size, 4]) + "G"
         disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
+        preemptible : select_first ([num_preemptions, 0])
     }
 }
