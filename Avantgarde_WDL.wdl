@@ -146,9 +146,9 @@ task final_r_reports {
     Int? num_preemptions
 
     command {
-        Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "${MetaData_PrecursorResults}" "final_result"
+        Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "${MetaData_PrecursorResults}" "${output_prefix}_avg_results"
 
-        zip -r "${output_prefix}_avg_results.zip" final_result
+        zip -r "${output_prefix}_avg_results.zip" "${output_prefix}_avg_results"
     }
 
     output {
