@@ -3,8 +3,6 @@ library(tidyr)
 library(stringr)
 library(data.table)
 
-dir.create("final_result")
-
 change_names<-function(data){
   names(data)<-gsub(names(data),pattern = "\\.",replacement = "")
   names(data)<-gsub(names(data),pattern = " ",replacement = "")
@@ -21,7 +19,8 @@ Transition_Locator <- as.character(args[4])
 MetaData_Replicate <- as.character(args[5])
 MetaData_PrecursorResults <- as.character(args[6])
 output_path <- as.character(args[7])
-# success_file <- as.character(args[8])
+
+dir.create(output_path)
 
 # read files
 MetaData_Analytes<- fread(MetaData_Analytes_path, stringsAsFactors = F) %>% change_names()
@@ -165,6 +164,3 @@ if(length(ListFiles_Transitions)>=1){
 
     fwrite(Annotations_PrecursorResults,file=file.path(output_path,"AnnotationsPrecursorResults.csv"), sep=",", row.names=F)
   }
-
-print(output_path)
-print(list.files(output_path))
