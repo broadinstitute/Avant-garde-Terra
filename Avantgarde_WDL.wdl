@@ -2,9 +2,9 @@ workflow Avantgarde {
 
     call convert_csv_to_zipped_parquet
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
-        call unzip_csv_avg {input: zip_file = one_zip}
+        call run_avg {input: zip_file = one_zip}
     }
-    call final_r_reports {input: csvs = unzip_csv_avg.output_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep, MetaData_PrecursorResults = convert_csv_to_zipped_parquet.output_metadata}
+    call final_r_reports {input: csvs = run_avg.output_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep, MetaData_PrecursorResults = convert_csv_to_zipped_parquet.output_metadata}
 }
 
 task convert_csv_to_zipped_parquet {
@@ -67,7 +67,7 @@ task convert_csv_to_zipped_parquet {
     }
 }
 
-task unzip_csv_avg {
+task run_avg {
 
     File zip_file
     File params_file
@@ -126,7 +126,7 @@ task unzip_csv_avg {
         docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
         memory: select_first([mem_size, 4]) + "G"
         disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
-        cpu: select_first ([num_threads, 2]) + ""
+        cpu: select_first ([num_threads, 4]) + ""
         preemptible : select_first ([num_preemptions, 0])
     }
 }
@@ -148,11 +148,11 @@ task final_r_reports {
     command {
         Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "${MetaData_PrecursorResults}" "final_result"
 
-        tar -czvf "${output_prefix}_avg_results.tar" final_result
+        zip -r "${output_prefix}_avg_results.zip" final_result
     }
 
     output {
-        File tar_out = "${output_prefix}_avg_results.tar"
+        File avg_results = "${output_prefix}_avg_results.zip"
     }
 
     runtime {
