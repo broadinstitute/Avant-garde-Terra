@@ -1,3 +1,6 @@
+## This script runs the Avant-garde algorithm; it has been adapted for compatibility with the python workflow and execution on Terra.
+### This is run during the second step of the WDL workflow: run_avg. It is called by the python function "run_r_script_for_all_analytes"
+
 print("_________________")
 
 library(dplyr)

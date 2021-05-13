@@ -1,3 +1,6 @@
+## This script creates the final Avant-garde results by combining the results from each analyte.
+### This is used in the final task of the WDL workflow: final_r_reports
+
 library(dplyr)
 library(tidyr)
 library(stringr)
