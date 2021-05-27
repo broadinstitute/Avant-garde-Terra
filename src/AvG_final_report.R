@@ -42,7 +42,6 @@ source(params_file)
 ## Peak_BOundaries
 PBlist<-list.files(avg_results_path, pattern = paste0("Report_GR_PeakBoundaries_"))
 ListFiles_PeakBoundaries<-paste0(avg_results_path,"/",PBlist)
-print(ListFiles_PeakBoundaries)
 
 if(length(ListFiles_PeakBoundaries)>=1){
   l <- lapply(ListFiles_PeakBoundaries, fread, header = F,sep=';', stringsAsFactors = FALSE)
@@ -70,7 +69,6 @@ if(length(ListFiles_PeakBoundaries)>=1){
 ## Report Transitions
 Translist<-list.files(avg_results_path,pattern = paste0("Report_GR_Transitions_"))
 ListFiles_Transitions<-paste0(avg_results_path,"/",Translist)
-print(ListFiles_Transitions)
 
 if(length(ListFiles_Transitions)>=1){
   l_trans <- lapply(ListFiles_Transitions, fread, header = F,sep=';', stringsAsFactors = FALSE)
