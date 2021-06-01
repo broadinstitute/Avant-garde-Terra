@@ -62,7 +62,7 @@ task convert_csv_to_zipped_parquet {
     runtime {
         docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
         memory: select_first([mem_size, 4]) + "G"
-        disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
+        disks: "local-disk " + select_first([disk_size, 100]) + " SSD"
         preemptible : select_first ([num_preemptions, 0])
     }
 }
@@ -74,7 +74,7 @@ task run_avg {
 
     Int? mem_size
     Int? disk_size
-    Int? num_threads
+    Int? num_cpu
     Int? num_preemptions
 
     command<<<
@@ -125,8 +125,8 @@ task run_avg {
     runtime {
         docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
         memory: select_first([mem_size, 4]) + "G"
-        disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
-        cpu: select_first ([num_threads, 4]) + ""
+        disks: "local-disk " + select_first([disk_size, 100]) + " SSD"
+        cpu: select_first ([num_cpu, 10]) + ""
         preemptible : select_first ([num_preemptions, 0])
     }
 }
@@ -148,7 +148,9 @@ task final_r_reports {
     command {
         Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "${MetaData_PrecursorResults}" "${output_prefix}_avg_results"
 
-        zip -r "${output_prefix}_avg_results.zip" "${output_prefix}_avg_results"
+        if [ ls "${output_prefix}_avg_results" | wc -l == 5 ]; then
+            zip -r "${output_prefix}_avg_results.zip" "${output_prefix}_avg_results"
+        fi
     }
 
     output {
@@ -158,7 +160,7 @@ task final_r_reports {
     runtime {
         docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
         memory: select_first([mem_size, 4]) + "G"
-        disks: "local-disk " + select_first([disk_size, 50]) + " SSD"
+        disks: "local-disk " + select_first([disk_size, 100]) + " SSD"
         preemptible : select_first ([num_preemptions, 0])
     }
 }
