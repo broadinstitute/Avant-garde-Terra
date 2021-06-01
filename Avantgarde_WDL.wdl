@@ -148,7 +148,7 @@ task final_r_reports {
     command {
         Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "${MetaData_PrecursorResults}" "${output_prefix}_avg_results"
 
-        if [ ls "${output_prefix}_avg_results" | wc -l == 5 ]; then
+        if [ `ls "${output_prefix}_avg_results" | wc -l` -eq 5 ]; then
             zip -r "${output_prefix}_avg_results.zip" "${output_prefix}_avg_results"
         fi
     }
