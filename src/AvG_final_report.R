@@ -84,7 +84,8 @@ if(length(Translist)>=1){
     full_join(NewTransitions_All_Results, by = c("ID_FragmentIon_charge", "ID_Analyte")) %>%
     mutate(Quantitative= ifelse(is.na(Quantitative),FALSE,TRUE)) %>%
     rename(ElementLocator = TransitionLocator) %>%
-    select(ElementLocator, Quantitative)
+    select(ElementLocator, Quantitative)%>%
+    filter(nchar(ElementLocator)>0)
   
   write.table(NewTransitions_All_Results,file=file.path(output_path,"Transition_results.csv"),quote=F,row.names=F,col.names=T,sep=",")
   rm(NewTransitions_All_Results) 
@@ -172,7 +173,8 @@ if(length(ReScoreList)>=1){
            annotation_AvG_MPRA_Score=MPRA.Score,
            annotation_AvG_SpectralLibSim_Score=Library.dotp,
            annotation_AvG_MassError_Score=Score.MassError,
-           annotation_AvG_Score=Skor)
+           annotation_AvG_Score=Skor)%>%
+    filter(nchar(ElementLocator)>0)
   
   fwrite(Annotations_PrecursorResults,file=file.path(output_path,"AnnotationsPrecursorResults.csv"), sep=",", row.names=F)
   rm(Annotations_PrecursorResults)
