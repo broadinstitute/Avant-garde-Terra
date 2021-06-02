@@ -65,6 +65,8 @@ if(length(ListFiles_PeakBoundaries)>=1){
   
   write.csv(NewPeakBoundaries_All_Results,file=file.path(output_path,"Peak_Boundaries_results.csv"),quote=F,row.names=F)
   rm(NewPeakBoundaries_All_Results)
+} else {
+  writeLines("No Report_GR_PeakBoundaries_", con = file.path(output_path, "Peak_Boundaries_results.txt"))
 }
 
 ## Report Transitions
@@ -85,7 +87,10 @@ if(length(Translist)>=1){
     select(ElementLocator, Quantitative)
   
   write.table(NewTransitions_All_Results,file=file.path(output_path,"Transition_results.csv"),quote=F,row.names=F,col.names=T,sep=",")
-  rm(NewTransitions_All_Results) } else {print("No Report_GR_Transitions_")}
+  rm(NewTransitions_All_Results) 
+} else {
+  writeLines("No Report_GR_Transitions_", con = file.path(output_path, "Transition_results.txt"))
+}
 
 ## Report Replicates
 RepList<-list.files(avg_results_path,pattern = paste0("Report_GR_Replicate_"))
@@ -107,7 +112,9 @@ if(length(RepList)>=1){
   
   write.table(NewReplicates_All_Results,file=file.path(output_path,"BeforeOpt_Replicates.csv"),quote=F,row.names=F,col.names=T,sep=",")
   rm(NewReplicates_All_Results)
-}else {print("No Report_GR_Replicate_")}
+} else {
+  writeLines("No Report_GR_Replicate_", con = file.path(output_path, "BeforeOpt_Replicates.txt"))
+}
 
 ## Report ReScore
 ReScoreList<-list.files(avg_results_path,pattern = paste0("Report_GR_ReScore_"))
@@ -129,7 +136,9 @@ if(length(ReScoreList)>=1){
   
   write.table(NewReScore_All_Results,file=file.path(output_path,"AfterOpt_Replicate_Score.csv"),quote=F,row.names=F,col.names=T,sep=",")
   rm(NewReScore_All_Results)
-}else {print("No Report_GR_ReScore_")}
+} else {
+  writeLines("No Report_GR_ReScore_", con = file.path(output_path, "AfterOpt_Replicate_Score.txt"))
+}
 
 ## Score Annotation
 
@@ -167,4 +176,6 @@ if(length(ReScoreList)>=1){
   
   fwrite(Annotations_PrecursorResults,file=file.path(output_path,"AnnotationsPrecursorResults.csv"), sep=",", row.names=F)
   rm(Annotations_PrecursorResults)
-}else {print("No Report_GR_ReScore_")}
+} else {
+  writeLines("No Report_GR_ReScore_", con = file.path(output_path, "AnnotationsPrecursorResults.txt"))
+}
