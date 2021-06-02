@@ -4,7 +4,7 @@ workflow Avantgarde {
     scatter (one_zip in convert_csv_to_zipped_parquet.output_zip) {
         call run_avg {input: zip_file = one_zip}
     }
-    call final_r_reports {input: csvs = run_avg.output_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep, MetaData_PrecursorResults = convert_csv_to_zipped_parquet.output_metadata}
+    call final_r_reports {input: csvs = run_avg.output_zip, glossary_file = convert_csv_to_zipped_parquet.output_glossary, transition_loc = convert_csv_to_zipped_parquet.output_transition_loc, id_rep = convert_csv_to_zipped_parquet.output_rep, MetaData_PrecursorResults = convert_csv_to_zipped_parquet.output_precursors}
 }
 
 task convert_csv_to_zipped_parquet {
@@ -56,7 +56,7 @@ task convert_csv_to_zipped_parquet {
         File output_glossary = "indices_glossary/ID_Analyte.csv"
         File output_transition_loc = "indices_glossary/ID_transition_locator.csv"
         File output_rep = "indices_glossary/ID_Rep.csv"
-        File output_metadata = "indices_glossary/MetaData_PrecursorResults.csv"
+        File output_precursors = "indices_glossary/MetaData_PrecursorResults.csv"
     }
 
     runtime {
@@ -148,7 +148,7 @@ task final_r_reports {
     command {
         Rscript /usr/local/src/AvG_final_report.R "${params_file}" "${sep=' ' csvs}" "${glossary_file}" "${transition_loc}" "${id_rep}" "${MetaData_PrecursorResults}" "${output_prefix}_avg_results"
 
-        if [ `ls "${output_prefix}_avg_results" | wc -l` -eq 5 ]; then
+        if [ `ls "${output_prefix}_avg_results" | wc -l` -ge 5 ]; then
             zip -r "${output_prefix}_avg_results.zip" "${output_prefix}_avg_results"
         fi
     }
