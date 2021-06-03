@@ -160,7 +160,7 @@ task final_r_reports {
     runtime {
         docker: "broadlincsproteomics/avant-garde:v1_0"
         memory: select_first([mem_size, 12]) + "G"
-        disks: "local-disk " + select_first([disk_size, 100]) + " SSD"
+        disks: "local-disk " + select_first([disk_size, 150]) + " SSD"
         preemptible : select_first ([num_preemptions, 0])
     }
 }
