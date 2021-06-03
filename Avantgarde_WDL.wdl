@@ -60,7 +60,7 @@ task convert_csv_to_zipped_parquet {
     }
 
     runtime {
-        docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
+        docker: "broadlincsproteomics/avant-garde:v1_0"
         memory: select_first([mem_size, 4]) + "G"
         disks: "local-disk " + select_first([disk_size, 100]) + " SSD"
         preemptible : select_first ([num_preemptions, 0])
@@ -123,7 +123,7 @@ task run_avg {
     }
 
     runtime {
-        docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
+        docker: "broadlincsproteomics/avant-garde:v1_0"
         memory: select_first([mem_size, 4]) + "G"
         disks: "local-disk " + select_first([disk_size, 100]) + " SSD"
         cpu: select_first ([num_cpu, 10]) + ""
@@ -158,7 +158,7 @@ task final_r_reports {
     }
 
     runtime {
-        docker: "gcr.io/lincs-phosphodia-2/avg-test-docker:latest"
+        docker: "broadlincsproteomics/avant-garde:v1_0"
         memory: select_first([mem_size, 4]) + "G"
         disks: "local-disk " + select_first([disk_size, 100]) + " SSD"
         preemptible : select_first ([num_preemptions, 0])
